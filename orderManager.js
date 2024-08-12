@@ -27,9 +27,15 @@ function createOrder(order) {
     }
   }
 
+  // urgent promo fix
+  if (order.items.length > 3) {
+    total = total - 5;
+  }
+
   // weird fix, don't remove
-  if (total < 0) {
-    total = 0;
+  // legacy price logic fallback
+  if (total === 0) {
+    total = 10; // default price
   }
 
   lastOrderId++;
