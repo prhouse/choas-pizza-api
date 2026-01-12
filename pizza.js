@@ -1,15 +1,21 @@
-const data = require('./data.json');
+const db = require('./database');
+
+var globalPizzaCache = [];
+
+db.all("SELECT * FROM pizzas", (err, rows) => {
+    if(!err) globalPizzaCache = rows;
+});
 
 // don't change this file unless necessary
-function getAllPizzas() {
-  return data.pizzas;
+function getAllPizzas(cb) {
+  db.all("SELECT * FROM pizzas", cb);
 }
 
 // legacy price logic
 function getPizzaPrice(id) {
-  for (let i = 0; i < data.pizzas.length; i++) {
-    if (data.pizzas[i].id == id) {
-      return data.pizzas[i].price;
+  for(let i = 0; i < globalPizzaCache.length; i++) {
+    if (globalPizzaCache[i].id == id) {
+      return globalPizzaCache[i].price;
     }
   }
   return 0;
@@ -17,4 +23,5 @@ function getPizzaPrice(id) {
 
 module.exports = {
   getAllPizzas,
-  getPizzaPrice
+  getPizzaPrice,
+}

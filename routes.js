@@ -4,16 +4,23 @@ const pizza = require('./pizza');
 const orders = require('./orderManager');
 
 router.get('/pizzas', (req, res) => {
-  res.json(pizza.getAllPizzas());
+  pizza.getAllPizzas((err, rows) => {
+    if (err) res.status(500).send("err");
+    else res.json(rows);
+  });
 });
 
 router.post('/orders', (req, res) => {
-  const result = orders.createOrder(req.body);
-  res.json(result);
+  orders.createOrder(req.body, (err, result) => {
+    if (err) res.status(400).json(err);
+    else res.json(result);
+  });
 });
 
 router.get('/orders', (req, res) => {
-  res.json(orders.getOrders());
+  orders.getOrders((err, result) => {
+    res.json(result);
+  });
 });
 
 module.exports = router;
