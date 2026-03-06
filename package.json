@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
+    "coverage": "jest --coverage",
     "load-test": "artillery run loadtest.yml"
   },
   "dependencies": {
