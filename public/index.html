@@ -47,9 +47,17 @@
 
         <hr class="my-4">
 
-        <div class="flex justify-between font-bold text-lg">
-          <span>Total</span>
-          <span id="total">—</span>
+        <div class="flex justify-between text-sm mb-1">
+          <span>Subtotal (HT)</span>
+          <span id="totalHT">—</span>
+        </div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>VAT (10%)</span>
+          <span id="vatAmount">—</span>
+        </div>
+        <div class="flex justify-between font-bold text-lg mt-2">
+          <span>Total (TTC)</span>
+          <span id="totalTTC">—</span>
         </div>
 
         <button onclick="placeOrder()"
@@ -108,12 +116,18 @@ function changeQty(delta) {
 function updateSummary() {
   if (!selectedPizza) return;
   const qty = Number(document.getElementById('qty').value);
+  const totalHT = selectedPizza.price * qty;
+  const vatAmount = totalHT * 0.1;
+  const totalTTC = totalHT + vatAmount;
+
   document.getElementById('summaryName').innerText =
     `${selectedPizza.name} x${qty}`;
   document.getElementById('summaryPrice').innerText =
-    `${selectedPizza.price * qty}€`;
-  document.getElementById('total').innerText =
-    `${selectedPizza.price * qty}€`;
+    `${totalHT.toFixed(2)}€`;
+  
+  document.getElementById('totalHT').innerText = `${totalHT.toFixed(2)}€`;
+  document.getElementById('vatAmount').innerText = `${vatAmount.toFixed(2)}€`;
+  document.getElementById('totalTTC').innerText = `${totalTTC.toFixed(2)}€`;
 }
 
 function placeOrder() {

@@ -65,7 +65,9 @@ if (total === 0) {
       let q = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
       db.run(q, function(err3) {
         if (err3) return cb({ error: "db error" });
-        cb(null, { id: this.lastID, total: utils.round(total), status: "CREATED" });
+        const totalHT = utils.round(total);
+        const totalTTC = utils.calculateTTC(totalHT);
+        cb(null, { id: this.lastID, totalHT, totalTTC, status: "CREATED" });
       });
 
       });
