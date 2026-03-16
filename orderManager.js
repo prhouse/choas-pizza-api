@@ -1,6 +1,7 @@
 const db = require('./database');
 const pizza = require('./pizza');
 const utils = require('./utils');
+const util = require('node:util');
 
 const PromoCodes = {
   FREE_PIZZA: "FREEPIZZA",
@@ -56,7 +57,6 @@ function calculateOrderTotal(order) {
   return total;
 }
 
-const util = require('util');
 const dbGet = util.promisify(db.get.bind(db));
 const dbRun = util.promisify(db.run.bind(db));
 

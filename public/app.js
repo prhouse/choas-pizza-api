@@ -101,6 +101,6 @@ function placeOrder() {
     });
 }
 
-window.changeQty = changeQty;
-window.selectPizza = selectPizza;
-window.placeOrder = placeOrder;
+globalThis.changeQty = changeQty;
+globalThis.selectPizza = selectPizza;
+globalThis.placeOrder = placeOrder;
