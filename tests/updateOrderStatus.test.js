@@ -8,7 +8,8 @@ describe('PUT /orders/:id/status', () => {
 
     beforeAll(async () => {
         const newOrder = {
-            items: [{ pizzaId: 1, qty: 1 }]
+            items: [{ pizzaId: 1, qty: 1 }],
+            email: 'test@test.com'
         };
 
         const response = await request(app)
