@@ -103,29 +103,29 @@ async function createOrder(order, cb) {
   }
 }
 
+function formatOrderResponse(order) {
+  const totalHT = utils.round(order.total);
+  const totalTTC = utils.calculateTTC(totalHT);
+  return {
+    ...order,
+    totalHT,
+    totalTTC
+  };
+}
+
 function getOrdersByEmail(email, cb) {
   if (!email) return cb({ error: "email is required" });
 
   db.all("SELECT * FROM orders WHERE email = ?", [email], function (err, rows) {
     if (err) return cb(err);
-    const result = rows.map(o => ({
-      ...o,
-      totalHT: utils.round(o.total),
-      totalTTC: utils.calculateTTC(o.total)
-    }));
-    cb(null, result);
+    cb(null, rows.map(formatOrderResponse));
   });
 }
 
 function getOrders(cb) {
   db.all("SELECT * FROM orders", function (err, rows) {
     if (err) return cb(err);
-    const result = rows.map(o => ({
-      ...o,
-      totalHT: utils.round(o.total),
-      totalTTC: utils.calculateTTC(o.total)
-    }));
-    cb(null, result);
+    cb(null, rows.map(formatOrderResponse));
   });
 }
 
