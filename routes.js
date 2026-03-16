@@ -24,10 +24,10 @@ router.get('/orders', (req, res) => {
 });
 
 router.put('/orders/:id/status', (req, res) => {
-  const orderId = parseInt(req.params.id, 10);
+  const orderId = Number.parseInt(req.params.id, 10);
   const { status } = req.body;
 
-  if (isNaN(orderId)) {
+  if (Number.isNaN(orderId)) {
     return res.status(400).json({ error: "Invalid order ID format" });
   }
 

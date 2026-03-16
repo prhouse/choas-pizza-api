@@ -96,10 +96,10 @@ function createOrder(order, cb) {
 
 }
 
-const VALID_STATUSES = ['PREPARING', 'DELIVERING', 'DELIVERED'];
+const VALID_STATUSES = new Set(['PREPARING', 'DELIVERING', 'DELIVERED']);
 
 function updateOrderStatus(id, status, cb) {
-  if (!VALID_STATUSES.includes(status)) {
+  if (!VALID_STATUSES.has(status)) {
     return cb({ error: "Invalid status provided. Must be one of: PREPARING, DELIVERING, DELIVERED", status: 400 });
   }
 
