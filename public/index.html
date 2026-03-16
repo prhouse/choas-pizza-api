@@ -117,7 +117,7 @@ function updateSummary() {
   if (!selectedPizza) return;
   const qty = Number(document.getElementById('qty').value);
   const totalHT = selectedPizza.price * qty;
-  const vatAmount = totalHT * 0.10;
+  const vatAmount = totalHT * 0.1;
   const totalTTC = totalHT + vatAmount;
 
   document.getElementById('summaryName').innerText =
