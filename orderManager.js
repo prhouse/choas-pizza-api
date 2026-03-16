@@ -46,7 +46,7 @@ function calculateOrderTotal(order) {
 }
 
 function createOrder(order, cb) {
-  if (!order || !order.items || order.items.length === 0) {
+  if (!order?.items?.length) {
     return cb({ error: "invalid order" });
   }
 
@@ -71,8 +71,8 @@ function createOrder(order, cb) {
     setTimeout(function() {
       db.run("UPDATE pizzas SET stock = " + (row.stock - quantity) + " WHERE id = " + firstId, function(err2) {
 
-      let q = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
-      db.run(q, function(err3) {
+      let query = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
+      db.run(query, function(err3) {
         if (err3) return cb({ error: "db error" });
         const totalHT = utils.round(total);
         const totalTTC = utils.calculateTTC(totalHT);

@@ -46,7 +46,7 @@ describe('POST /orders', () => {
             .send(bigOrderWithPromo)
             .expect(200);
 
-        expect(response.body.total).toBe(0);
+        expect(response.body.totalHT).toBe(0);
     });
 
     it('test createOrder entrées invalides', async () => {
