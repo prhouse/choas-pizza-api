@@ -2,6 +2,18 @@ const db = require('./database');
 const pizza = require('./pizza');
 const utils = require('./utils');
 
+const PromoCodes = {
+  FREE_PIZZA: "FREEPIZZA",
+  HALF: "HALF"
+};
+
+const OrderDefaults = {
+  FREE: 0,
+  FALLBACK_PRICE: 10,
+  BIG_ORDER_THRESHOLD: 3,
+  BIG_ORDER_DISCOUNT: 5
+};
+
 let lastOrderId = 0;
 
 function calculateOrderTotal(order) {
@@ -18,10 +30,10 @@ function calculateOrderTotal(order) {
   let useFreePizza = false;
 
   if (promoCode) {
-    if (promoCode === "FREEPIZZA") {
-      total = 0;
+    if (promoCode === PromoCodes.FREE_PIZZA) {
+      total = OrderDefaults.FREE;
       useFreePizza = true;
-    } else if (promoCode === "HALF") {
+    } else if (promoCode === PromoCodes.HALF) {
       total /= 2;
     }
   }
@@ -30,16 +42,15 @@ function calculateOrderTotal(order) {
     total -= total * 0.1;
   }
 
-  if (total === 0 && !useFreePizza) {
-    total = 10;
+  if (total === OrderDefaults.FREE && !useFreePizza) {
+    total = OrderDefaults.FALLBACK_PRICE;
   }
 
-  if (order.items.length > 3 && !useFreePizza) {
-    total -= 5;
-  }
-
-  if (total === 0 && !useFreePizza) {
-    total = utils.calculateOrderTotalLegacy(order);
+  if (order.items.length > OrderDefaults.BIG_ORDER_THRESHOLD && !useFreePizza) {
+    total -= OrderDefaults.BIG_ORDER_DISCOUNT;
+    if (total === OrderDefaults.FREE) {
+      total = utils.calculateOrderTotalLegacy(order);
+    }
   }
 
   return total;
