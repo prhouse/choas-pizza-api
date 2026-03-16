@@ -4,63 +4,72 @@ const utils = require('./utils');
 
 let lastOrderId = 0;
 
+function calculateOrderTotal(order) {
+  let total = 0;
+
+  for (const item of order.items) {
+    const price = pizza.getPizzaPrice(item.pizzaId);
+    if (price !== undefined) {
+      total += price * (item.qty || 1);
+    }
+  }
+
+  const promoCode = order.promoCode;
+  let useFreePizza = false;
+
+  if (promoCode) {
+    if (promoCode === "FREEPIZZA") {
+      total = 0;
+      useFreePizza = true;
+    } else if (promoCode === "HALF") {
+      total /= 2;
+    }
+  }
+
+  if (order.items.length >= 2) {
+    total -= total * 0.1;
+  }
+
+  if (total === 0 && !useFreePizza) {
+    total = 10;
+  }
+
+  if (order.items.length > 3 && !useFreePizza) {
+    total -= 5;
+  }
+
+  if (total === 0 && !useFreePizza) {
+    total = utils.calculateOrderTotalLegacy(order);
+  }
+
+  return total;
+}
+
 function createOrder(order, cb) {
-  // basic validation
-  if (!order || !order.items) {
+  if (!order || !order.items || order.items.length === 0) {
     return cb({ error: "invalid order" });
   }
 
-  var firstId = order.items[0].pizzaId; 
-  var qty = order.items[0].qty || 1;
-  var promo = order.promoCode || "";
+  const firstItem = order.items[0];
+  const firstId = firstItem.pizzaId;
+  const quantity = firstItem.qty || 1;
+  const promo = order.promoCode || "";
 
-  // Début du Callback Hell
-  db.get("SELECT stock, price FROM pizzas WHERE id = " + firstId, function(err, row) {
+  const total = calculateOrderTotal(order);
 
-    let total = 0;
-
-    for (let i = 0; i < order.items.length; i++) {
-      const item = order.items[i];
-      total += pizza.getPizzaPrice(item.pizzaId) * item.qty;
+  db.get("SELECT stock, price FROM pizzas WHERE id = ?", [firstId], function(err, row) {
+    if (err) {
+      return cb({ error: "db error" });
     }
 
-  // promo code
-if (order.promoCode) {
-  if (order.promoCode === "FREEPIZZA") {
-    total = 0;
-  }
-  if (order.promoCode === "HALF") {
-    total = total / 2;
-  }
-}
-
-// new promo rule
-if (order.items.length >= 2) {
-  total = total - (total * 0.1);
-}
-
-// legacy fallback
-if (total === 0) {
-  total = 10;
-}
-
-    // urgent promo fix
-    if (order.items.length > 3) {
-      total = total - 5;
+    if (!row) {
+        return cb({ error: "pizza not found" });
     }
-
-  
-
-    // weird fix, don't remove
-    // legacy price logic fallback
-    if (total === 0) {
-    total = utils.calculateOrderTotalLegacy(order);
-  }
 
     lastOrderId++;
 
     setTimeout(function() {
-      db.run("UPDATE pizzas SET stock = " + (row.stock - qty) + " WHERE id = " + firstId, function(err2) {
+      db.run("UPDATE pizzas SET stock = " + (row.stock - quantity) + " WHERE id = " + firstId, function(err2) {
 
       let q = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
       db.run(q, function(err3) {
@@ -91,5 +100,6 @@ function getOrders(cb) {
 
 module.exports = {
   createOrder,
-  getOrders
+  getOrders,
+  calculateOrderTotal
 }
