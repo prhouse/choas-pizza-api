@@ -23,4 +23,31 @@ router.get('/orders', (req, res) => {
   });
 });
 
+router.get('/orders/user/:email', (req, res) => {
+  orders.getOrdersByEmail(req.params.email, (err, result) => {
+    if (err) res.status(500).json(err);
+    else res.json(result);
+  });
+});
+
+router.put('/orders/:id/status', (req, res) => {
+  const orderId = Number.parseInt(req.params.id, 10);
+  const { status } = req.body;
+
+  if (Number.isNaN(orderId)) {
+    return res.status(400).json({ error: "Invalid order ID format" });
+  }
+
+  if (!status) {
+    return res.status(400).json({ error: "Status field is required in the body" });
+  }
+
+  orders.updateOrderStatus(orderId, status, (err, result) => {
+    if (err) {
+      return res.status(err.status || 500).json({ error: err.error });
+    }
+    res.json(result);
+  });
+});
+
 module.exports = router;

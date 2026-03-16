@@ -1,3 +1,5 @@
+const VAT_RATE = 0.10;
+
 function round(value) {
   if (!value) {
     return 0;
@@ -8,6 +10,10 @@ function round(value) {
 // used in multiple places
 function formatPrice(p) {
   return p + "€";
+}
+
+function calculateTTC(totalHT) {
+  return round(totalHT * (1 + VAT_RATE));
 }
 
 // legacy pricing logic, used in multiple places
@@ -39,7 +45,9 @@ function calculateOrderTotalLegacy(order) {
 }
 
 module.exports = {
+  VAT_RATE,
   round,
   formatPrice,
+  calculateTTC,
   calculateOrderTotalLegacy
 };

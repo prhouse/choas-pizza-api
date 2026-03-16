@@ -28,6 +28,13 @@
             class="px-3 py-1 border rounded">+</button>
         </div>
 
+        <!-- Email -->
+        <div>
+          <input id="email" type="email"
+            placeholder="Your email address"
+            class="w-64 border rounded px-4 py-2" required />
+        </div>
+
         <!-- Promo -->
         <div>
           <input id="promo" type="text"
@@ -47,9 +54,17 @@
 
         <hr class="my-4">
 
-        <div class="flex justify-between font-bold text-lg">
-          <span>Total</span>
-          <span id="total">—</span>
+        <div class="flex justify-between text-sm mb-1">
+          <span>Subtotal (HT)</span>
+          <span id="totalHT">—</span>
+        </div>
+        <div class="flex justify-between text-sm mb-1">
+          <span>VAT (10%)</span>
+          <span id="vatAmount">—</span>
+        </div>
+        <div class="flex justify-between font-bold text-lg mt-2">
+          <span>Total (TTC)</span>
+          <span id="totalTTC">—</span>
         </div>
 
         <button onclick="placeOrder()"
@@ -63,80 +78,6 @@
     </div>
   </div>
 
-<script>
-let pizzas = [];
-let selectedPizza = null;
-
-fetch('/pizzas')
-  .then(r => r.json())
-  .then(data => {
-    pizzas = data;
-    renderPizzas();
-  });
-
-function renderPizzas() {
-  const list = document.getElementById('pizzaList');
-  list.innerHTML = '';
-
-  pizzas.forEach(p => {
-    const div = document.createElement('div');
-    div.className =
-      'flex justify-between items-center p-4 bg-white rounded-lg border cursor-pointer hover:bg-gray-50';
-    div.innerHTML = `
-      <span class="font-medium">${p.name}</span>
-      <span class="text-gray-500">${p.price}€</span>
-    `;
-    div.onclick = () => selectPizza(p, div);
-    list.appendChild(div);
-  });
-}
-
-function selectPizza(pizza, el) {
-  document.querySelectorAll('#pizzaList > div')
-    .forEach(d => d.classList.remove('border-black'));
-  el.classList.add('border-black');
-  selectedPizza = pizza;
-  updateSummary();
-}
-
-function changeQty(delta) {
-  const input = document.getElementById('qty');
-  input.value = Math.max(1, Number(input.value) + delta);
-  updateSummary();
-}
-
-function updateSummary() {
-  if (!selectedPizza) return;
-  const qty = Number(document.getElementById('qty').value);
-  document.getElementById('summaryName').innerText =
-    `${selectedPizza.name} x${qty}`;
-  document.getElementById('summaryPrice').innerText =
-    `${selectedPizza.price * qty}€`;
-  document.getElementById('total').innerText =
-    `${selectedPizza.price * qty}€`;
-}
-
-function placeOrder() {
-  if (!selectedPizza) return;
-
-  fetch('/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      items: [{
-        pizzaId: selectedPizza.id,
-        qty: Number(document.getElementById('qty').value)
-      }],
-      promoCode: document.getElementById('promo').value
-    })
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById('result').innerText =
-      JSON.stringify(data, null, 2);
-  });
-}
-</script>
-
+  <script src="app.js"></script>
 </body>
 </html>
