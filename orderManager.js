@@ -1,6 +1,7 @@
 const db = require('./database');
 const pizza = require('./pizza');
 const utils = require('./utils');
+const util = require('node:util');
 
 const PromoCodes = {
   FREE_PIZZA: "FREEPIZZA",
@@ -56,44 +57,69 @@ function calculateOrderTotal(order) {
   return total;
 }
 
-function createOrder(order, cb) {
+const dbGet = util.promisify(db.get.bind(db));
+const dbRun = util.promisify(db.run.bind(db));
+
+async function createOrder(order, cb) {
   if (!order?.items?.length) {
     return cb({ error: "invalid order" });
+  }
+
+  const email = order.email || "";
+  if (!email) {
+    return cb({ error: "email is required" });
   }
 
   const firstItem = order.items[0];
   const firstId = firstItem.pizzaId;
   const quantity = firstItem.qty || 1;
   const promo = order.promoCode || "";
-
   const total = calculateOrderTotal(order);
 
-  db.get("SELECT stock, price FROM pizzas WHERE id = ?", [firstId], function(err, row) {
-    if (err) {
-      return cb({ error: "db error" });
-    }
-
+  try {
+    const row = await dbGet("SELECT stock, price FROM pizzas WHERE id = ?", [firstId]);
     if (!row) {
-        return cb({ error: "pizza not found" });
+      return cb({ error: "pizza not found" });
     }
 
     lastOrderId++;
 
-    setTimeout(function() {
-      db.run("UPDATE pizzas SET stock = " + (row.stock - quantity) + " WHERE id = " + firstId, function(err2) {
+    await new Promise(resolve => setTimeout(resolve, 300));
 
-      let query = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
-      db.run(query, function(err3) {
-        if (err3) return cb({ error: "db error" });
-        const totalHT = utils.round(total);
-        const totalTTC = utils.calculateTTC(totalHT);
-        cb(null, { id: this.lastID, totalHT, totalTTC, status: "CREATED" });
-      });
+    await dbRun("UPDATE pizzas SET stock = ? WHERE id = ?", [row.stock - quantity, firstId]);
 
-      });
-    }, 300);
+    const query = "INSERT INTO orders (total, status, promo, email) VALUES (?, 'CREATED', ?, ?)";
+    await dbRun(query, [total, promo, email]);
+
+    const lastOrderRow = await dbGet("SELECT last_insert_rowid() as id");
+
+    const totalHT = utils.round(total);
+    const totalTTC = utils.calculateTTC(totalHT);
+
+    cb(null, { id: lastOrderRow.id, totalHT, totalTTC, status: "CREATED" });
+  } catch (err) {
+    console.error(err);
+    cb({ error: "db error" });
+  }
+}
+
+function formatOrderResponse(order) {
+  const totalHT = utils.round(order.total);
+  const totalTTC = utils.calculateTTC(totalHT);
+  return {
+    ...order,
+    totalHT,
+    totalTTC
+  };
+}
+
+function getOrdersByEmail(email, cb) {
+  if (!email) return cb({ error: "email is required" });
+
+  db.all("SELECT * FROM orders WHERE email = ?", [email], function (err, rows) {
+    if (err) return cb(err);
+    cb(null, rows.map(formatOrderResponse));
   });
-
 }
 
 const VALID_STATUSES = new Set(['PREPARING', 'DELIVERING', 'DELIVERED']);
@@ -116,23 +142,16 @@ function updateOrderStatus(id, status, cb) {
 }
 
 function getOrders(cb) {
-  db.all("SELECT * FROM orders", function(err, rows) {
+  db.all("SELECT * FROM orders", function (err, rows) {
     if (err) return cb(err);
-    let result = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      let o = rows[i];
-      o.total = utils.round(o.total * 1.05); // Taxe d'inflation sauvage appliquée a posteriori
-      result.push(o);
-    }
-    
-    cb(null, result);
+    cb(null, rows.map(formatOrderResponse));
   });
 }
 
 module.exports = {
   createOrder,
   getOrders,
+  getOrdersByEmail,
   calculateOrderTotal,
   updateOrderStatus
 };

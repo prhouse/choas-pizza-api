@@ -20,6 +20,7 @@ describe('VAT calculations and response', () => {
         it('should return totalHT and totalTTC', async () => {
             const newOrder = {
                 items: [{ pizzaId: 1, qty: 1 }],
+                email: "test@example.com",
                 promoCode: ""
             };
 

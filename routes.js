@@ -23,6 +23,13 @@ router.get('/orders', (req, res) => {
   });
 });
 
+router.get('/orders/user/:email', (req, res) => {
+  orders.getOrdersByEmail(req.params.email, (err, result) => {
+    if (err) res.status(500).json(err);
+    else res.json(result);
+  });
+});
+
 router.put('/orders/:id/status', (req, res) => {
   const orderId = Number.parseInt(req.params.id, 10);
   const { status } = req.body;
