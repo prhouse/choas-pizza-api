@@ -6,6 +6,7 @@ describe('POST /orders', () => {
     it("test de création d'une commande", async () => {
         const newOrder = {
             items: [{ pizzaId: 2, qty: 1 }],
+            email: "test@example.com",
             promoCode: ""
         };
 
@@ -26,6 +27,7 @@ describe('POST /orders', () => {
     it('test de la fonction createOrder avec FREEPIZZA doit être 0', async () => {
         const orderWithPromo = {
             items: [{ pizzaId: 1, qty: 2 }],
+            email: "test@example.com",
             promoCode: "FREEPIZZA"
         };
         const response = await request(app)
@@ -39,6 +41,7 @@ describe('POST /orders', () => {
     it('test de la fonction createOrder avec FREEPIZZA et plus de 3 articles doit rester 0', async () => {
         const bigOrderWithPromo = {
             items: [{ pizzaId: 1, qty: 1 }, { pizzaId: 2, qty: 1 }, { pizzaId: 3, qty: 1 }, { pizzaId: 4, qty: 1 }],
+            email: "test@example.com",
             promoCode: "FREEPIZZA"
         };
         const response = await request(app)

@@ -65,6 +65,11 @@ function createOrder(order, cb) {
   const firstId = firstItem.pizzaId;
   const quantity = firstItem.qty || 1;
   const promo = order.promoCode || "";
+  const email = order.email || "";
+
+  if (!email) {
+    return cb({ error: "email is required" });
+  }
 
   const total = calculateOrderTotal(order);
 
@@ -82,8 +87,8 @@ function createOrder(order, cb) {
     setTimeout(function() {
       db.run("UPDATE pizzas SET stock = " + (row.stock - quantity) + " WHERE id = " + firstId, function(err2) {
 
-      let query = "INSERT INTO orders (total, status, promo) VALUES (" + total + ", 'CREATED', '" + promo + "')";
-      db.run(query, function(err3) {
+      let query = "INSERT INTO orders (total, status, promo, email) VALUES (?, 'CREATED', ?, ?)";
+      db.run(query, [total, promo, email], function(err3) {
         if (err3) return cb({ error: "db error" });
         const totalHT = utils.round(total);
         const totalTTC = utils.calculateTTC(totalHT);
@@ -96,17 +101,28 @@ function createOrder(order, cb) {
 
 }
 
+function getOrdersByEmail(email, cb) {
+  if (!email) return cb({ error: "email is required" });
+  
+  db.all("SELECT * FROM orders WHERE email = ?", [email], function(err, rows) {
+    if (err) return cb(err);
+    const result = rows.map(o => ({
+      ...o,
+      totalHT: utils.round(o.total),
+      totalTTC: utils.calculateTTC(o.total)
+    }));
+    cb(null, result);
+  });
+}
+
 function getOrders(cb) {
   db.all("SELECT * FROM orders", function(err, rows) {
     if (err) return cb(err);
-    let result = [];
-
-    for (let i = 0; i < rows.length; i++) {
-      let o = rows[i];
-      o.total = utils.round(o.total * 1.05); // Taxe d'inflation sauvage appliquée a posteriori
-      result.push(o);
-    }
-    
+    const result = rows.map(o => ({
+      ...o,
+      totalHT: utils.round(o.total),
+      totalTTC: utils.calculateTTC(o.total)
+    }));
     cb(null, result);
   });
 }
@@ -114,5 +130,6 @@ function getOrders(cb) {
 module.exports = {
   createOrder,
   getOrders,
+  getOrdersByEmail,
   calculateOrderTotal
-}
+};

@@ -28,6 +28,13 @@
             class="px-3 py-1 border rounded">+</button>
         </div>
 
+        <!-- Email -->
+        <div>
+          <input id="email" type="email"
+            placeholder="Your email address"
+            class="w-64 border rounded px-4 py-2" required />
+        </div>
+
         <!-- Promo -->
         <div>
           <input id="promo" type="text"
@@ -141,6 +148,7 @@ function placeOrder() {
         pizzaId: selectedPizza.id,
         qty: Number(document.getElementById('qty').value)
       }],
+      email: document.getElementById('email').value,
       promoCode: document.getElementById('promo').value
     })
   })
