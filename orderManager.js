@@ -122,6 +122,25 @@ function getOrdersByEmail(email, cb) {
   });
 }
 
+const VALID_STATUSES = new Set(['PREPARING', 'DELIVERING', 'DELIVERED']);
+
+function updateOrderStatus(id, status, cb) {
+  if (!VALID_STATUSES.has(status)) {
+    return cb({ error: "Invalid status provided. Must be one of: PREPARING, DELIVERING, DELIVERED", status: 400 });
+  }
+
+  const query = "UPDATE orders SET status = ? WHERE id = ?";
+  db.run(query, [status, id], function(err) {
+    if (err) {
+      return cb({ error: "Database error occurred", status: 500 });
+    }
+    if (this.changes === 0) {
+      return cb({ error: "Order not found", status: 404 });
+    }
+    cb(null, { id, status });
+  });
+}
+
 function getOrders(cb) {
   db.all("SELECT * FROM orders", function (err, rows) {
     if (err) return cb(err);
@@ -133,5 +152,6 @@ module.exports = {
   createOrder,
   getOrders,
   getOrdersByEmail,
-  calculateOrderTotal
+  calculateOrderTotal,
+  updateOrderStatus
 };
