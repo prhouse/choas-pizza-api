@@ -16,10 +16,11 @@ describe('POST /orders', () => {
             .expect(200);
 
         expect(response.body).toHaveProperty('id');
-        expect(response.body).toHaveProperty('total');
+        expect(response.body).toHaveProperty('totalHT');
+        expect(response.body).toHaveProperty('totalTTC');
         expect(response.body).toHaveProperty('status');
         expect(response.body.status).toBe('CREATED');
-        expect(typeof response.body.total).toBe('number');
+        expect(typeof response.body.totalHT).toBe('number');
     });
 
     it('test de la fonction createOrder avec FREEPIZZA doit être 0', async () => {
@@ -32,7 +33,7 @@ describe('POST /orders', () => {
             .send(orderWithPromo)
             .expect(200);
 
-        expect(response.body.total).toBe(0);
+        expect(response.body.totalHT).toBe(0);
     });
 
     it('test de la fonction createOrder avec FREEPIZZA et plus de 3 articles doit rester 0', async () => {
