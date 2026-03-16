@@ -3,7 +3,6 @@ const app = require('../app');
 const db = require('../database');
 
 describe('Order History API', () => {
-    const testEmail = 'test@example.com';
 
     it('should require an email when creating an order', async () => {
         const orderWithoutEmail = {
