@@ -2,7 +2,7 @@ config:
   target: "http://localhost:3000"
   phases:
     - duration: 5
-      arrivalRate: 20
+      arrivalRate: 70
       name: "Ruée sur les 50 Margheritas"
 scenarios:
   - name: "Acheter une pizza"
@@ -10,7 +10,22 @@ scenarios:
       - post:
           url: "/orders"
           json:
+            email: "test@test.com"
             promoCode: "HALF"
             items:
               - pizzaId: 1
                 qty: 1
+  - name: "Parcours Complet"
+    flow:
+      - get:
+          url: "/pizzas"
+      - post:
+          url: "/orders"
+          json:
+            email: "faim@etudiant.fr"
+            promoCode: "RUSH"
+            items:
+              - pizzaId: 2
+                qty: 2
+      - get:
+          url: "/orders/user/faim@etudiant.fr"
