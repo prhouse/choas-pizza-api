@@ -33,7 +33,7 @@ function calculateOrderTotalLegacy(order) {
     }
 
     // price resolution
-    const price = require('./pizza').getPizzaPrice(item.pizzaId);
+    const price = require('../repositories/pizza').getPizzaPrice(item.pizzaId);
 
     total = total + price * (item.qty || 1);
   }

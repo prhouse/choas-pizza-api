@@ -1,6 +1,6 @@
 const request = require('supertest');
-const app = require('../app');
-const utils = require('../utils');
+const app = require('../src/app');
+const utils = require('../src/utils/utils');
 
 describe('VAT calculations and response', () => {
 

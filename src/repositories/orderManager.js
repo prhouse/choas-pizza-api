@@ -1,6 +1,6 @@
-const db = require('./database');
+const db = require('../database/database');
 const pizza = require('./pizza');
-const utils = require('./utils');
+const utils = require('../utils/utils');
 const util = require('node:util');
 
 const PromoCodes = {
