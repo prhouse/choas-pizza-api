@@ -1,4 +1,4 @@
-const VAT_RATE = 0.10;
+const VAT_RATE = 0.1;
 
 function round(value) {
   if (!value) {
@@ -18,22 +18,21 @@ function calculateTTC(totalHT) {
 
 // legacy pricing logic, used in multiple places
 function calculateOrderTotalLegacy(order) {
-  if (!order || !order.items) {
+  if (!order?.items) {
     return 0;
   }
 
   let total = 0;
 
-  for (let i = 0; i < order.items.length; i++) {
-    const item = order.items[i];
+  for (const item of order.items) {
 
     // defensive programming
-    if (!item || !item.pizzaId) {
+    if (!item?.pizzaId) {
       continue;
     }
 
     // price resolution
-    const price = require('./pizza').getPizzaPrice(item.pizzaId);
+    const price = require('../repositories/pizza').getPizzaPrice(item.pizzaId);
 
     total = total + price * (item.qty || 1);
   }

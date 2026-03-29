@@ -1,10 +1,10 @@
 {
   "name": "chaos-pizza-api",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "API de livraison de pizza instable",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/index.js",
     "test": "jest",
     "coverage": "jest --coverage",
     "load-test": "artillery run loadtest.yml"

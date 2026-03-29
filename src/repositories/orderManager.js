@@ -1,6 +1,6 @@
-const db = require('./database');
+const db = require('../database/database');
 const pizza = require('./pizza');
-const utils = require('./utils');
+const utils = require('../utils/utils');
 const util = require('node:util');
 
 const PromoCodes = {
@@ -84,8 +84,6 @@ async function createOrder(order, cb) {
 
     lastOrderId++;
 
-    await new Promise(resolve => setTimeout(resolve, 300));
-
     await dbRun("UPDATE pizzas SET stock = ? WHERE id = ?", [row.stock - quantity, firstId]);
 
     const query = "INSERT INTO orders (total, status, promo, email) VALUES (?, 'CREATED', ?, ?)";
@@ -130,7 +128,7 @@ function updateOrderStatus(id, status, cb) {
   }
 
   const query = "UPDATE orders SET status = ? WHERE id = ?";
-  db.run(query, [status, id], function(err) {
+  db.run(query, [status, id], function (err) {
     if (err) {
       return cb({ error: "Database error occurred", status: 500 });
     }
